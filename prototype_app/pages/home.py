@@ -1,37 +1,20 @@
 # streamlit app for prototype (first version)
 import streamlit as st
 
-# Page Configuration
-st.set_page_config(
-    page_title="PromptPrep",
-    page_icon="🎯",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
-
-# Custom Element Styling
+# Custom CSS
 st.markdown(
     """
     <style>
-    /* Style for Primary Blue Button */
-    .st-key-NewSessionBtn label[data-testid="stWidgetLabel"] div.stButton > button p {
-        background-color: #1E88E5;
-        color: white;
-        font-size: 20px;
-        font-weight: bold;
-        border-radius: 8px;
-        padding: 12px 24px;
-        transition: all 0.2s ease-in-out;
+    .st-key-custom_link_wrap div[data-testid="stPageLink"] a p {
+        color: #5794f7 !important;
+        font-size: 25px !important;
+        font-weight: 600 !important;
+        text-decoration: underline !important;
     }
-
-    /* Hover state */
-    div.stButton > button:hover p {
-        background-color: #1565C0;
-        color: white;
-    }
+    </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 
@@ -126,10 +109,7 @@ with col2:
     """)
 
 if api_key:
-    pass
-    #st.button("Start new quiz session ➡️")
+    with st.container(key="custom_link_wrap"):
+        st.page_link("pages/new_session.py", label="Click here to start a new quiz session", icon="➡️")
 else:
     st.info("👈 Enter your Gemini API Key in the sidebar to start.")
-
-
-st.button("Start new quiz session ➡️", key="NewSessionBtn")
