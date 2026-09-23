@@ -7,8 +7,7 @@ QUIZ_REEL_PROMPT_TEMPLATE = """
     ### CONTEXT & PARAMETERS
     - **Topic**: {topic},
     - **Difficulty Level**: {difficulty},
-    - **Batch Size**: {count} question(s),
-    - **Randomization Seed**: {seed},
+    - **Batch Size**: {count} question(s)
 
     ### STRICT GENERATION RULES
     1. **Factuality & Accuracy**:
@@ -32,7 +31,7 @@ QUIZ_REEL_PROMPT_TEMPLATE = """
 """
 
 # Instantiate the PromptTemplate
-quiz_reel_prompt = PromptTemplate(
+generate_question_batch_prompt = PromptTemplate(
     template=QUIZ_REEL_PROMPT_TEMPLATE,
-    input_variables=["topic", "difficulty", "count", "seed"]
+    input_variables=["topic", "difficulty", "count"]
 )

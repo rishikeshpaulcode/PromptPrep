@@ -7,7 +7,7 @@ load_dotenv()
  
 def get_base_model(temperature: float = 0.7) -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(
-        model="gemini-3.5-flash",
+        model="gemini-3.6-flash",
         temperature=temperature,
         timeout=30
     )
