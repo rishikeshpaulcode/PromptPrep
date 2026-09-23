@@ -1,4 +1,16 @@
+# Environment Variable Management
+python-dotenv
+
+# Prototype UI dependencies
 streamlit
+
+# API integration
 fastapi
 uvicorn
 requests
+
+# LLM integration
+langchain
+langchain-core
+langchain-google-genai
+google-generativeai
