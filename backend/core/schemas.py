@@ -10,7 +10,7 @@ class QuestionInternal(BaseModel):
     Excludes answer keys and explanations.
     """
     id: str
-    prompt: str = Field(description="The quiz question text")
+    question_text: str = Field(description="The quiz question text")
     options: List[str] = Field(description="List of exactly 4 choices")
     correct_option_index: int = Field(description="Index (0-3) of correct answer")
     explanation: str = Field(description="Why the answer is correct")
@@ -22,14 +22,14 @@ class QuestionPublic(BaseModel):
     Excludes answer keys and explanations.
     """
     id: str
-    prompt: str
+    question_text: str
     options: List[str]
 
 
 class QuizBatch(BaseModel):
     """
     Structured payload schema passed to LangChain to force the LLM 
-    to generate multiple questions in a single JSON response.
+    to generate multiple questions in a single response.
     """
     questions: List[QuestionInternal]
 
