@@ -9,7 +9,7 @@ class QuestionInternal(BaseModel):
     Internal question details.
     Contains all question details including answer key and explaination.
     """
-    id: str
+    id: int
     question_text: str = Field(description="The quiz question text")
     options: List[str] = Field(description="List of exactly 4 choices")
     correct_option_index: int = Field(description="Index (0-3) of correct answer")
@@ -21,7 +21,7 @@ class QuestionPublic(BaseModel):
     Public-facing question representation safe to send to the client UI.
     Excludes answer keys and explanations.
     """
-    id: str
+    id: int
     question_text: str
     options: List[str]
 
@@ -56,6 +56,7 @@ class SubmitAnswerRequest(BaseModel):
     """
     Payload sent by the client when submitting an answer for evaluation.
     """
+    question_id: int
     selected_option_index: int
 
 
@@ -63,6 +64,7 @@ class SubmitAnswerResponse(BaseModel):
     """
     Response returned after evaluating a submitted answer.
     """
+    question_id: int
     is_correct: bool
     correct_option_index: int
     explanation: str
