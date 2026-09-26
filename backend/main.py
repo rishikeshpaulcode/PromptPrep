@@ -1,13 +1,7 @@
 # FastAPI application
-# testing
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from core.services import AIService
 
-ai_service = AIService()
-
-question_batch = ai_service.generate_question_bach(
-    topic="Newtons Laws of Motion",
-    difficulty="easy",
-    count=3
-)
-
-print(question_batch)
+app = FastAPI(title="AI Service API")
