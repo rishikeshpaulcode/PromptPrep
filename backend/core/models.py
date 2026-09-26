@@ -1,6 +1,6 @@
 # created and returns ai models
 from langchain_google_genai import ChatGoogleGenerativeAI
-from schemas import QuizBatch
+from core.schemas import QuizBatch
 from dotenv import load_dotenv
 
 load_dotenv()
