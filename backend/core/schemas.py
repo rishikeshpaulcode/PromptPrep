@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 class QuestionInternal(BaseModel):
     """
-    Public-facing question representation safe to send to the client UI.
-    Excludes answer keys and explanations.
+    Internal question details.
+    Contains all question details including answer key and explaination.
     """
     id: str
     question_text: str = Field(description="The quiz question text")
@@ -31,7 +31,7 @@ class QuizBatch(BaseModel):
     Structured payload schema passed to LangChain to force the LLM 
     to generate multiple questions in a single response.
     """
-    questions: List[QuestionInternal]
+    questions: List[QuestionInternal] = Field(default=[])
 
 
 class CreateSessionRequest(BaseModel):
@@ -40,12 +40,12 @@ class CreateSessionRequest(BaseModel):
     to generate multiple questions in a single JSON response.
     """
     topic: str
-    difficulty: str = "medium"
+    difficulty: str
 
 
 class CreateSessionResponse(BaseModel):
     """
-    Response returned upon successfully initializing a quiz reel session.
+    Response returned upon successfully initializing a quiz session.
     Provides immediate payload to bootstrap the client feed.
     """
     session_id: str
