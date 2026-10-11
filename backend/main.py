@@ -18,9 +18,12 @@ app.add_middleware(
 )
 
 # global contants
-TOPIC = ""
-DIFFICULTY = ""
-COUNT = 5
+session_state = CreateSessionResponse(
+    session_id="",
+    topic="",
+    difficulty=""
+)
+COUNT = 7
 
 # Instantiate the service
 ai_service = AIService()
@@ -31,12 +34,12 @@ question_list = QuizBatch()
 
 @app.post("/api/new_session")
 def init_new_session(topic: str, difficulty: str):
-    global TOPIC
-    global DIFFICULTY
+    global session_state
 
     if topic and difficulty:
-        TOPIC = topic
-        DIFFICULTY = difficulty
+        session_state.topic = topic
+        session_state.difficulty = difficulty
+        
         return {"message": "session initialized successfully"}
     else:
         return {"error": "either topic or difficulty is missing"}
@@ -47,8 +50,8 @@ def init_new_session(topic: str, difficulty: str):
 async def add_questions(count: int = COUNT):
     try:
         new_question_batch = await ai_service.generate_question_batch(
-            topic=TOPIC,
-            difficulty=DIFFICULTY,
+            topic=session_state.topic,
+            difficulty=session_state.difficulty,
             count=count
         )
 
