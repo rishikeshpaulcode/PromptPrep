@@ -1,7 +1,7 @@
 # FastAPI application
 import asyncio
 import secrets
-from fastapi import FastAPI, HTTPException, responses
+from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from core.schemas import *
@@ -35,13 +35,13 @@ question_list = QuizBatch()
 
 
 @app.post("/api/new_session")
-def init_new_session(topic: str, difficulty: str):
+def init_new_session(topic: str, difficulty: str, response: Response):
     if topic and difficulty:
         session_state.session_id = generate_session_id()
         session_state.topic = topic
         session_state.difficulty = difficulty
 
-        responses.set_cookie(
+        response.set_cookie(
             key="session_id",
             value=session_state.session_id,
             httponly=True,
@@ -49,9 +49,12 @@ def init_new_session(topic: str, difficulty: str):
             samesite="lax"
         )
         
-        return {"message": "session initialized successfully"}
+        return {"message": "Session initialized successfully"}
     else:
-        return {"error": "either topic or difficulty is missing"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Either topic or difficulty is missing"
+        )
 
 
 
