@@ -18,12 +18,12 @@ app.add_middleware(
 )
 
 # global contants
+COUNT = 7
 session_state = CreateSessionResponse(
     session_id="",
     topic="",
     difficulty=""
 )
-COUNT = 7
 
 # Instantiate the service
 ai_service = AIService()
@@ -34,9 +34,8 @@ question_list = QuizBatch()
 
 @app.post("/api/new_session")
 def init_new_session(topic: str, difficulty: str):
-    global session_state
-
     if topic and difficulty:
+        # generate session_id
         session_state.topic = topic
         session_state.difficulty = difficulty
         
