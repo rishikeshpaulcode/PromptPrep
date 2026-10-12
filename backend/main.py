@@ -1,9 +1,11 @@
 # FastAPI application
 import asyncio
-from fastapi import FastAPI, HTTPException
+import secrets
+from fastapi import FastAPI, HTTPException, responses
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from core.schemas import *
+from core.utilities import *
 from core.services import AIService
 
 app = FastAPI(title="AI Service API")
@@ -35,9 +37,17 @@ question_list = QuizBatch()
 @app.post("/api/new_session")
 def init_new_session(topic: str, difficulty: str):
     if topic and difficulty:
-        # generate session_id
+        session_state.session_id = generate_session_id()
         session_state.topic = topic
         session_state.difficulty = difficulty
+
+        responses.set_cookie(
+            key="session_id",
+            value=session_state.session_id,
+            httponly=True,
+            secure=True,
+            samesite="lax"
+        )
         
         return {"message": "session initialized successfully"}
     else:
