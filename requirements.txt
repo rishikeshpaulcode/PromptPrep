@@ -4,6 +4,9 @@ python-dotenv
 # Prototype UI dependencies
 streamlit
 
+# Database dependencies
+redis[hiredis]
+
 # API integration
 fastapi
 uvicorn

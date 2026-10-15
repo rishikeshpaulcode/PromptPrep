@@ -19,6 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Instantiate the service
+ai_service = AIService()
+
 # global contants
 COUNT = 7
 session_state = CreateSessionResponse(
@@ -27,8 +30,6 @@ session_state = CreateSessionResponse(
     difficulty=""
 )
 
-# Instantiate the service
-ai_service = AIService()
 
 # Question list
 question_list = QuizBatch()
