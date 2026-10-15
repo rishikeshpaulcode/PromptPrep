@@ -1,6 +1,7 @@
 # FastAPI application
 import asyncio
 import secrets
+import redis
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -19,8 +20,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Instantiate Redis server
+redis_service = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+try:
+    if redis_service.ping():
+        print("Connected to Redis successfully!")
+except redis.ConnectionError:
+    print("Could not connect to Redis server.")
+
+
 # Instantiate the service
 ai_service = AIService()
+
 
 # global contants
 COUNT = 7
