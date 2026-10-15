@@ -61,10 +61,10 @@ class CreateSessionResponse(BaseModel):
     session_id: str
     topic: str
     difficulty: str
-    score: int
-    total_time_taken: int
-    average_time_taken: int
-    session_feedback: str    # ai generated
+    score: int = Field(default=0)
+    total_time_taken: int = Field(default=0)
+    average_time_taken: int = Field(default=0)
+    session_feedback: str = Field(default="")    # ai generated
 
 
 class SubmitAnswerRequest(BaseModel):
