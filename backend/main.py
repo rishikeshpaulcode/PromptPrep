@@ -46,24 +46,18 @@ def init_new_session(topic: str, difficulty: str, response: Response):
     It initalizes and stores the session state into redis server.
     '''
     if topic and difficulty:
+        session_id=generate_session_id()
+
         session_state = CreateSessionResponse(
-            session_id=generate_session_id(),
             topic=topic,
             difficulty=difficulty
         )
 
-        redis_service.hset(f"session:{session_state.session_id}:session-state", mapping={
-            "topic": session_state.topic,
-            "difficulty": session_state.difficulty,
-            "score": session_state.score,
-            "total_time_taken": session_state.total_time_taken,
-            "average_time_taken": session_state.average_time_taken,
-            "session_feedback": session_state.session_feedback
-        })
+        redis_service.hset(f"session:{session_id}:session-state", mapping=session_state.model_dump())
 
         response.set_cookie(
             key="session_id",
-            value=session_state.session_id,
+            value=session_id,
             httponly=True,
             secure=True,
             samesite="lax"
@@ -90,6 +84,7 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
 
     try:
         total_available_questions = redis_service.hlen(f"session:{session_id}:question_map")
+        # extra_questions_available =  hget(f"session:{session_id}:session-state", "num_questions_delivered")
 
         topic = redis_service.hget(f"session:{session_id}:session-state", "topic")
         difficulty = redis_service.hget(f"session:{session_id}:session-state", "difficulty")
@@ -114,8 +109,8 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
         )
 
 
-@app.get("/api/get_question_by_id")
-def get_question_by_id(question_id: str, session_id: str | None = Cookie(None)):
+@app.get("/api/get_next_question")
+def get_next_question(session_id: str | None = Cookie(None)):
     '''
     Retrieves a specific question by its unique identifier.
     Args:
@@ -125,7 +120,10 @@ def get_question_by_id(question_id: str, session_id: str | None = Cookie(None)):
     if not session_id:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
-    raw_data = redis_service.hget(f"session:{session_id}:question_map", question_id)
+    n = redis_service.hget(f"session:{session_id}:session-state", "num_questions_delivered")
+    next_question_id = f"q{n + 1}"
+
+    raw_data = redis_service.hget(f"session:{session_id}:question_map", next_question_id)
     if not raw_data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
 
@@ -135,5 +133,6 @@ def get_question_by_id(question_id: str, session_id: str | None = Cookie(None)):
         question_text=question_detials["question_text"],
         options=question_detials["options"]
     )
-    
+
+    redis_service.hset(f"session:{session_id}:session-state", "num_questions_delivered", n + 1)
     return question_secure

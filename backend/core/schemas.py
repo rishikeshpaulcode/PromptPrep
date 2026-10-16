@@ -40,10 +40,10 @@ class CreateSessionResponse(BaseModel):
     Response returned upon successfully initializing a quiz session.
     Provides immediate payload to bootstrap the client feed.
     """
-    session_id: str
     topic: str
     difficulty: str
     score: int = Field(default=0)
+    num_questions_delivered: int = Field(default=0)
     total_time_taken: int = Field(default=0)
     average_time_taken: int = Field(default=0)
     session_feedback: str = Field(default="")    # ai generated
