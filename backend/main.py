@@ -1,6 +1,7 @@
 # FastAPI application
 import asyncio
 import secrets
+import json
 import redis
 from fastapi import FastAPI, HTTPException, Response, status, Cookie
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,16 +35,16 @@ except redis.ConnectionError:
 ai_service = AIService()
 
 
-# global contants
+# Global contants
 COUNT = 7
-
-
-# Question list
-question_list = QuizBatch()
 
 
 @app.post("/api/new_session")
 def init_new_session(topic: str, difficulty: str, response: Response):
+    '''
+    This function runs only once when the user starts and new quiz session.
+    It initalizes and stores the session state into redis server.
+    '''
     if topic and difficulty:
         session_state = CreateSessionResponse(
             session_id=generate_session_id(),
@@ -76,13 +77,20 @@ def init_new_session(topic: str, difficulty: str, response: Response):
         )
 
 
-
 @app.post("/api/generate_new_questions")
 async def add_questions(session_id: str | None = Cookie(None), count: int = COUNT):
+    '''
+    This fuction is used to create new questions using the AI Service.
+    It is asynchronous and generates new questions only
+    when the total numer of available questions reaches
+    minimum threshold of 2.
+    '''
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
+        total_available_questions = redis_service.hlen("session:123:question_map")
+
         topic = redis_service.hget(f"session:{session_id}:session-state", "topic")
         difficulty = redis_service.hget(f"session:{session_id}:session-state", "difficulty")
 
@@ -92,7 +100,17 @@ async def add_questions(session_id: str | None = Cookie(None), count: int = COUN
             count=count
         )
 
-        question_list.questions.extend(new_question_batch)
+        i = 1
+        for ques in new_question_batch.questions:
+            redis_service.hset(f"session:{session_id}:session-state", f"q{total_available_questions + i}", json.dumps({
+                "question_text": ques.question_text,
+                "options": ques.options,
+                "correct_option_index": ques.correct_option_index,
+                "explanation": ques.explanation
+            }))
+
+            i += 1
+
         return {"message": f"{count} new questions added successfully"}
     except:
         raise HTTPException(
