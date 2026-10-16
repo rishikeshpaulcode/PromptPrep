@@ -39,7 +39,7 @@ ai_service = AIService()
 COUNT = 7
 
 
-@app.post("/api/new_session")
+@app.post("/api/init_new_session")
 def init_new_session(topic: str, difficulty: str, response: Response):
     '''
     This function runs only once when the user starts and new quiz session.
@@ -78,7 +78,7 @@ def init_new_session(topic: str, difficulty: str, response: Response):
 
 
 @app.post("/api/generate_new_questions")
-async def add_questions(session_id: str | None = Cookie(None), count: int = COUNT):
+async def generate_new_questions(session_id: str | None = Cookie(None), count: int = COUNT):
     '''
     This fuction is used to create new questions using the AI Service.
     It is asynchronous and generates new questions only
@@ -117,3 +117,8 @@ async def add_questions(session_id: str | None = Cookie(None), count: int = COUN
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not add new questions",
         )
+
+
+@app.get("/api/get_question_by_id")
+def get_question_by_id():
+    pass
