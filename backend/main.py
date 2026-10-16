@@ -89,7 +89,7 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        total_available_questions = redis_service.hlen("session:123:question_map")
+        total_available_questions = redis_service.hlen(f"session:{session_id}:question_map")
 
         topic = redis_service.hget(f"session:{session_id}:session-state", "topic")
         difficulty = redis_service.hget(f"session:{session_id}:session-state", "difficulty")
@@ -103,7 +103,7 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
         i = 1
         for ques in new_question_batch.questions:
             ques.question_id = f"q{total_available_questions + i}"
-            redis_service.hset(f"session:{session_id}:session-state", ques.question_id, ques.model_dump_json())
+            redis_service.hset(f"session:{session_id}:question_map", ques.question_id, ques.model_dump_json())
             i += 1
 
         return {"message": f"{count} new questions added successfully"}
@@ -116,4 +116,24 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
 
 @app.get("/api/get_question_by_id")
 def get_question_by_id(question_id: str, session_id: str | None = Cookie(None)):
-    pass
+    '''
+    Retrieves a specific question by its unique identifier.
+    Args:
+        question_id: The unique ID of the question to fetch.
+        session_id: Optional session tracking cookie.
+    '''
+    if not session_id:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+    raw_data = redis_service.hget(f"session:{session_id}:question_map", question_id)
+    if not raw_data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    question_detials = json.loads(raw_data)
+    question_secure = QuestionPublic(
+        question_id=question_detials["question_id"],
+        question_text=question_detials["question_text"],
+        options=question_detials["options"]
+    )
+    
+    return question_secure
