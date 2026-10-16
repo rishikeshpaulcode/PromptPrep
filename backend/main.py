@@ -102,7 +102,9 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
 
         i = 1
         for ques in new_question_batch.questions:
-            redis_service.hset(f"session:{session_id}:session-state", f"q{total_available_questions + i}", json.dumps({
+            curr_ques_id = f"q{total_available_questions + i}"
+            redis_service.hset(f"session:{session_id}:session-state", curr_ques_id, json.dumps({
+                "question_id": curr_ques_id,
                 "question_text": ques.question_text,
                 "options": ques.options,
                 "correct_option_index": ques.correct_option_index,
@@ -120,5 +122,5 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
 
 
 @app.get("/api/get_question_by_id")
-def get_question_by_id():
+def get_question_by_id(question_id: str, session_id: str | None = Cookie(None)):
     pass
