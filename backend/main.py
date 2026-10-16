@@ -102,15 +102,8 @@ async def generate_new_questions(session_id: str | None = Cookie(None), count: i
 
         i = 1
         for ques in new_question_batch.questions:
-            curr_ques_id = f"q{total_available_questions + i}"
-            redis_service.hset(f"session:{session_id}:session-state", curr_ques_id, json.dumps({
-                "question_id": curr_ques_id,
-                "question_text": ques.question_text,
-                "options": ques.options,
-                "correct_option_index": ques.correct_option_index,
-                "explanation": ques.explanation
-            }))
-
+            ques.question_id = f"q{total_available_questions + i}"
+            redis_service.hset(f"session:{session_id}:session-state", ques.question_id, ques.model_dump_json())
             i += 1
 
         return {"message": f"{count} new questions added successfully"}
