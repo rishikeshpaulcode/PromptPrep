@@ -34,6 +34,15 @@ class QuestionPublic(BaseModel):
     options: List[str]
 
 
+class CreateSessionRequest(BaseModel):
+    """
+    Structure of request to be sent by frontend as payload
+    in order to initialize a new Quiz Session.
+    """
+    topic: str
+    difficulty: str
+
+
 
 class CreateSessionResponse(BaseModel):
     """

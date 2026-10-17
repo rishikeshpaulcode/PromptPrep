@@ -41,46 +41,40 @@ CORRECT_ANSWER_POINTS = 4
 INCORRECT_ANSWER_POINTS = -1
 
 
-@app.post("/api/init_new_session")
-def init_new_session(topic: str, difficulty: str, response: Response):
-    '''
+@app.post("/api/init_new_session", status_code=status.HTTP_201_CREATED)
+def init_new_session(payload: CreateSessionRequest, response: Response):
+    """
     This function runs only once when the user starts and new quiz session.
     It initalizes and stores the session state into redis server.
-    '''
-    if topic and difficulty:
-        session_id=generate_session_id()
+    """
+    session_id=generate_session_id()
 
-        session_state = CreateSessionResponse(
-            topic=topic,
-            difficulty=difficulty
-        )
+    session_state = CreateSessionResponse(
+        topic=payload.topic,
+        difficulty=payload.difficulty
+    )
 
-        redis_service.hset(f"session:{session_id}:session-state", mapping=session_state.model_dump())
+    redis_service.hset(f"session:{session_id}:session-state", mapping=session_state.model_dump())
 
-        response.set_cookie(
-            key="session_id",
-            value=session_id,
-            httponly=True,
-            secure=True,
-            samesite="lax"
-        )
-        
-        return {"message": "Session initialized successfully"}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Either topic or difficulty is missing"
-        )
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+    
+    return {"message": "Session initialized successfully"}
 
 
-@app.post("/api/generate_new_questions")
+@app.post("/api/generate_new_questions", status_code=status.HTTP_201_CREATED)
 async def generate_new_questions(count: int = COUNT, session_id: str | None = Cookie(None)):
-    '''
+    """
     This fuction is used to create new questions using the AI Service.
     It is asynchronous and generates new questions only
     when the total numer of available questions reaches
     minimum threshold of 2.
-    '''
+    """
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -113,12 +107,12 @@ async def generate_new_questions(count: int = COUNT, session_id: str | None = Co
 
 @app.get("/api/get_next_question")
 def get_next_question(session_id: str | None = Cookie(None)):
-    '''
+    """
     Retrieves a specific question by its unique identifier.
     Args:
         question_id: The unique ID of the question to fetch.
         session_id: Optional session tracking cookie.
-    '''
+    """
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -142,11 +136,11 @@ def get_next_question(session_id: str | None = Cookie(None)):
 
 @app.post("/api/check_answer")
 def check_answer(payload: SubmitAnswerRequest, session_id: str | None = Cookie(None)):
-    '''
+    """
     Evaluates a user's answer submission,
     Updates session scores and counters in Redis,
     and returns the correctness evaluation.
-    '''
+    """
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
