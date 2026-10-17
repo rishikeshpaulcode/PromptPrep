@@ -142,6 +142,11 @@ def get_next_question(session_id: str | None = Cookie(None)):
 
 @app.post("/api/check_answer")
 def check_answer(payload: SubmitAnswerRequest, session_id: str | None = Cookie(None)):
+    '''
+    Evaluates a user's answer submission,
+    Updates session scores and counters in Redis,
+    and returns the correctness evaluation.
+    '''
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
