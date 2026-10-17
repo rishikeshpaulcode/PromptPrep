@@ -37,6 +37,8 @@ ai_service = AIService()
 
 # Global contants
 COUNT = 7
+CORRECT_ANSWER_POINTS = 4
+INCORRECT_ANSWER_POINTS = -1
 
 
 @app.post("/api/init_new_session")
@@ -72,7 +74,7 @@ def init_new_session(topic: str, difficulty: str, response: Response):
 
 
 @app.post("/api/generate_new_questions")
-async def generate_new_questions(session_id: str | None = Cookie(None), count: int = COUNT):
+async def generate_new_questions(count: int = COUNT, session_id: str | None = Cookie(None)):
     '''
     This fuction is used to create new questions using the AI Service.
     It is asynchronous and generates new questions only
@@ -118,7 +120,7 @@ def get_next_question(session_id: str | None = Cookie(None)):
         session_id: Optional session tracking cookie.
     '''
     if not session_id:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
     n = redis_service.hget(f"session:{session_id}:session-state", "num_questions_delivered")
     next_question_id = f"q{n + 1}"
@@ -136,3 +138,41 @@ def get_next_question(session_id: str | None = Cookie(None)):
 
     redis_service.hset(f"session:{session_id}:session-state", "num_questions_delivered", n + 1)
     return question_secure
+
+
+@app.post("/api/check_answer")
+def check_answer(question_id: str | None = None, selected_option_index: int | None = None, session_id: str | None = Cookie(None)):
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    if not question_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Question ID is missing"
+        )
+
+    if not selected_option_index:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Option not selected"
+        )
+
+    raw_data = redis_service.hget(f"session:{session_id}:question_map", question_id)
+    if not raw_data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+    
+    question_details = json.loads(raw_data)
+
+    evaluation_response = SubmitAnswerResponse(
+        question_id=question_id,
+        is_correct=(selected_option_index == question_details["correct_option_index"]),
+        correct_option_index=question_details["correct_option_index"],
+        explanation=question_details["explanation"]
+    )
+
+    curr_score = redis_service.hget(f"session:{session_id}:session-state", "score")
+    if evaluation_response.is_correct:
+        redis_service.hset(f"session:{session_id}:session-state", "score", curr_score + CORRECT_ANSWER_POINTS)
+    else:
+        redis_service.hset(f"session:{session_id}:session-state", "score", curr_score + INCORRECT_ANSWER_POINTS)
+
