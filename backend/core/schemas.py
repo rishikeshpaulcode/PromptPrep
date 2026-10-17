@@ -44,6 +44,8 @@ class CreateSessionResponse(BaseModel):
     difficulty: str
     score: int = Field(default=0)
     num_questions_delivered: int = Field(default=0)
+    num_questions_correct: int = Field(default=0)
+    num_questions_incorrect: int = Field(default=0)
     total_time_taken: int = Field(default=0)
     average_time_taken: int = Field(default=0)
     session_feedback: str = Field(default="")    # ai generated

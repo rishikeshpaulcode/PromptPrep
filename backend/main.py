@@ -141,38 +141,46 @@ def get_next_question(session_id: str | None = Cookie(None)):
 
 
 @app.post("/api/check_answer")
-def check_answer(question_id: str | None = None, selected_option_index: int | None = None, session_id: str | None = Cookie(None)):
+def check_answer(payload: SubmitAnswerRequest, session_id: str | None = Cookie(None)):
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    if not question_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Question ID is missing"
-        )
+    session_state = redis_service.hgetall(f"session:{session_id}:session-state")
+    if not session_state:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session details not found")
 
-    if not selected_option_index:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Option not selected"
-        )
-
-    raw_data = redis_service.hget(f"session:{session_id}:question_map", question_id)
+    raw_data = redis_service.hget(f"session:{session_id}:question_map", payload.question_id)
     if not raw_data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
     
     question_details = json.loads(raw_data)
+    curr_score = int(session_state["score"])
+    curr_num_questions_correct = int(session_state["num_questions_correct"])
+    curr_num_questions_incorrect = int(session_state["num_questions_incorrect"])
+
+    is_correct = (payload.selected_option_index == question_details["correct_option_index"])
 
     evaluation_response = SubmitAnswerResponse(
-        question_id=question_id,
-        is_correct=(selected_option_index == question_details["correct_option_index"]),
+        question_id=payload.question_id,
+        is_correct=is_correct,
         correct_option_index=question_details["correct_option_index"],
         explanation=question_details["explanation"]
     )
 
-    curr_score = redis_service.hget(f"session:{session_id}:session-state", "score")
     if evaluation_response.is_correct:
-        redis_service.hset(f"session:{session_id}:session-state", "score", curr_score + CORRECT_ANSWER_POINTS)
+        new_score = curr_score + CORRECT_ANSWER_POINTS
+        new_num_questions_correct = curr_num_questions_correct + 1
+        new_num_questions_incorrect = curr_num_questions_incorrect
     else:
-        redis_service.hset(f"session:{session_id}:session-state", "score", curr_score + INCORRECT_ANSWER_POINTS)
+        new_score =  curr_score + INCORRECT_ANSWER_POINTS
+        new_num_questions_correct = curr_num_questions_correct
+        new_num_questions_incorrect =  curr_num_questions_incorrect + 1
+
+    redis_service.hset(f"session:{session_id}:session-state", mapping={
+        "score": new_score,
+        "num_questions_correct": new_num_questions_correct,
+        "num_questions_incorrect": new_num_questions_incorrect
+    })
+
+    return evaluation_response
 
