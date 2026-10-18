@@ -12,5 +12,5 @@ def get_base_model(temperature: float = 0.7) -> ChatGoogleGenerativeAI:
         timeout=30
     )
 
-def get_structured_model(temperature: float = 0.7) -> ChatGoogleGenerativeAI:
+def get_question_batch_model(temperature: float = 0.7) -> ChatGoogleGenerativeAI:
     return get_base_model(temperature).with_structured_output(LLMQuizBatch)
