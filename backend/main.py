@@ -105,7 +105,7 @@ async def generate_new_questions(count: int = COUNT, session_id: str | None = Co
         )
 
 
-@app.get("/api/get_next_question")
+@app.get("/api/get_next_question", response_model=QuestionPublic)
 def get_next_question(session_id: str | None = Cookie(None)):
     """
     Retrieves a specific question by its unique identifier.
@@ -134,7 +134,7 @@ def get_next_question(session_id: str | None = Cookie(None)):
     return question_secure
 
 
-@app.post("/api/check_answer")
+@app.post("/api/check_answer", response_model=SubmitAnswerResponse)
 def check_answer(payload: SubmitAnswerRequest, session_id: str | None = Cookie(None)):
     """
     Evaluates a user's answer submission,
@@ -182,4 +182,20 @@ def check_answer(payload: SubmitAnswerRequest, session_id: str | None = Cookie(N
     })
 
     return evaluation_response
+
+
+@app.get("/api/get_session_summary", response_model=CreateSessionResponse)
+def get_session_summary(session_id: str | None = Cookie(None)):
+    """
+    This endpoint is to be called once the user ends a quiz session.
+    This return all the session data along with overall results.
+    """
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    session_state = redis_service.hgetall(f"session:{session_id}:session-state")
+    if not session_state:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session details not found")
+
+    return session_state
 

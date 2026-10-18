@@ -57,7 +57,7 @@ class CreateSessionResponse(BaseModel):
     num_questions_incorrect: int = Field(default=0)
     total_time_taken: int = Field(default=0)
     average_time_taken: int = Field(default=0)
-    session_feedback: str = Field(default="")    # ai generated
+    session_feedback: str = Field(default="Coming Soon")    # ai generated
 
 
 class SubmitAnswerRequest(BaseModel):
