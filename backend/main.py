@@ -96,6 +96,23 @@ def init_new_session(payload: CreateSessionRequest, response: Response):
     return {"message": "Session initialized successfully"}
 
 
+@app.post("/api/init_new_quiz", status_code=status.HTTP_201_CREATED)
+def init_new_quiz(count: int = COUNT, session_id: str | None = Cookie(None)):
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    generate_new_questions(session_id=session_id, count=count)
+    num_generated_questions = redis_service.hlen(f"session:{session_id}:question_map")
+
+    if num_generated_questions == count:
+        return {"message": f"Inintial {count} questions generated successfully"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Background question generation failed"
+        )
+
+
 @app.get("/api/get_next_question", response_model=QuestionPublic)
 def get_next_question(background_tasks: BackgroundTasks, session_id: str | None = Cookie(None)):
     """
