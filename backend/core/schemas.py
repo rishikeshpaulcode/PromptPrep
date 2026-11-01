@@ -9,7 +9,7 @@ class LLMQuestionDetails(BaseModel):
     Contains all question details including answer key and explaination.
     To be used to guide LLM to generate question it this order.
     """
-    question_id: str = Field(description="Leave this field empty if you are AI")
+    question_id: str | None = Field(description="Leave this field empty if you are AI", default=None)
     question_text: str = Field(description="The quiz question text")
     options: List[str] = Field(description="List of exactly 4 choices")
     correct_option_index: int = Field(description="Index (0-3) of correct answer")
