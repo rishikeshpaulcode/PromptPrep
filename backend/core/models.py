@@ -1,4 +1,5 @@
-# created and returns ai models
+# creates and returns ai models
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from core.schemas import LLMQuizBatch
 from dotenv import load_dotenv

@@ -1,3 +1,5 @@
+# contains all the promt templates
+
 from langchain_core.prompts import PromptTemplate
 
 # Infinite Quiz Reel System Prompt Template Text
