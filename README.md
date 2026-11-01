@@ -1,4 +1,4 @@
-# Quiz Reel
+# PromptPrep
 
 An endless, AI-generated quiz feed. Pick a topic, add a short focus, and keep answering one multiple-choice question at a time until you decide to stop.
 
