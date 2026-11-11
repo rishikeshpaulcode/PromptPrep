@@ -57,7 +57,6 @@ class CreateSessionResponse(BaseModel):
     num_questions_incorrect: int = Field(default=0)
     total_time_taken: int = Field(default=0)
     average_time_taken: int = Field(default=0)
-    session_feedback: str = Field(default="Coming Soon")    # ai generated
     is_generating_question_batch: bool = Field(default=False)
 
 

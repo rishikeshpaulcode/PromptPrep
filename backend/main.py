@@ -68,7 +68,7 @@ def generate_new_questions(session_id: str, count: int = COUNT) -> None:
     )
 
     total_available_questions = redis_service.hlen(
-        f"session:{session_id}:question_map"
+        f"session:{session_id}:question-map"
     )
     topic = redis_service.hget(f"session:{session_id}:session-state", "topic")
     difficulty = redis_service.hget(
@@ -85,7 +85,7 @@ def generate_new_questions(session_id: str, count: int = COUNT) -> None:
     for ques in new_question_batch.questions:
         ques.question_id = f"q{total_available_questions + i}"
         redis_service.hset(
-            f"session:{session_id}:question_map",
+            f"session:{session_id}:question-map",
             ques.question_id,
             ques.model_dump_json(),
         )
@@ -137,7 +137,7 @@ def init_new_quiz(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     generate_new_questions(session_id=session_id, count=count)
-    num_generated_questions = redis_service.hlen(f"session:{session_id}:question_map")
+    num_generated_questions = redis_service.hlen(f"session:{session_id}:question-map")
 
     if num_generated_questions == count:
         return {"message": f"Inintial {count} questions generated successfully"}
@@ -158,7 +158,7 @@ def get_next_question(
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    num_generated_questions = redis_service.hlen(f"session:{session_id}:question_map")
+    num_generated_questions = redis_service.hlen(f"session:{session_id}:question-map")
     n = (
         redis_service.hget(
             f"session:{session_id}:session-state", "num_questions_delivered"
@@ -168,7 +168,7 @@ def get_next_question(
     next_question_id = f"q{n}"
 
     raw_data = redis_service.hget(
-        f"session:{session_id}:question_map", next_question_id
+        f"session:{session_id}:question-map", next_question_id
     )
     if not raw_data:
         raise HTTPException(
@@ -212,7 +212,7 @@ def check_answer(
             detail="Session details not found",
         )
 
-    raw_data = redis_service.hget(f"session:{session_id}:question_map", payload.question_id)
+    raw_data = redis_service.hget(f"session:{session_id}:question-map", payload.question_id)
     if not raw_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Question not found"
