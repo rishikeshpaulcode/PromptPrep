@@ -24,6 +24,25 @@ class LLMQuizBatch(BaseModel):
     questions: List[LLMQuestionDetails]
 
 
+class LLMWeakConcept(BaseModel):
+    """
+    Describes one weak concept and concise advice for improving it.
+    """
+
+    concept: str = Field(description="The precise weak concept identified")
+    advice: str = Field(description="One or two tips for improving the concept")
+
+
+class LLMSessionFeedback(BaseModel):
+    """
+    Structured AI feedback for the concepts missed during a quiz session.
+    """
+
+    weak_concepts: List[LLMWeakConcept] = Field(
+        description="List of weak concepts identified from incorrect questions"
+    )
+
+
 class QuestionPublic(BaseModel):
     """
     Public-facing question representation safe to send to the client UI.

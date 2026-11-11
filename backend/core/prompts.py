@@ -37,3 +37,23 @@ generate_question_batch_prompt = PromptTemplate(
     template=QUIZ_REEL_PROMPT_TEMPLATE,
     input_variables=["topic", "difficulty", "count"]
 )
+
+
+SESSION_FEEDBACK_PROMPT_TEMPLATE = """
+You are an expert educational coach reviewing a student's quiz performance.
+
+Quiz topic: {topic}
+Incorrect question texts:
+{incorrect_question_texts}
+
+Identify every distinct, precise knowledge gap demonstrated by the incorrect
+questions. For each weak concept, provide one or two practical tips that will
+help the student improve that concept. Do not provide an overall score,
+general study advice, or feedback unrelated to the listed questions.
+Return the result strictly according to the requested structured schema.
+"""
+
+get_session_feedback_prompt = PromptTemplate(
+    template=SESSION_FEEDBACK_PROMPT_TEMPLATE,
+    input_variables=["topic", "incorrect_question_texts"],
+)

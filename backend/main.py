@@ -15,6 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.schemas import (
     CreateSessionRequest,
     CreateSessionResponse,
+    LLMSessionFeedback,
+    LLMWeakConcept,
     QuestionPublic,
     SubmitAnswerRequest,
     SubmitAnswerResponse,
@@ -242,6 +244,10 @@ def check_answer(
         new_score = curr_score + INCORRECT_ANSWER_POINTS
         new_num_questions_correct = curr_num_questions_correct
         new_num_questions_incorrect =  curr_num_questions_incorrect + 1
+        redis_service.rpush(
+            f"session:{session_id}:incorrect-questions",
+            question_details["question_text"],
+        )
 
     redis_service.hset(
         f"session:{session_id}:session-state",
@@ -253,6 +259,42 @@ def check_answer(
     )
 
     return evaluation_response
+
+
+@app.get("/api/get_session_feedback", response_model=LLMSessionFeedback)
+def get_session_feedback(
+    session_id: str | None = Cookie(None),
+) -> LLMSessionFeedback:
+    """
+    Return AI-generated feedback for concepts missed in the current session.
+    """
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    session_state = redis_service.hgetall(f"session:{session_id}:session-state")
+    if not session_state:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session details not found",
+        )
+
+    incorrect_question_texts = redis_service.lrange(
+        f"session:{session_id}:incorrect-questions", 0, -1
+    )
+    if not incorrect_question_texts:
+        return LLMSessionFeedback(
+            weak_concepts=[
+                LLMWeakConcept(
+                    concept="No weak concepts identified",
+                    advice="Good job! Keep it up.",
+                )
+            ]
+        )
+
+    return ai_service.get_session_feedback(
+        topic=session_state["topic"],
+        incorrect_question_texts=incorrect_question_texts,
+    )
 
 
 @app.get("/api/get_session_summary", response_model=CreateSessionResponse)
