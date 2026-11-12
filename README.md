@@ -34,17 +34,13 @@ This is an open-source project built with two goals:
 
 ## Features
 
-**Available in the backend today**
-
 - Session creation with a chosen topic and difficulty
 - Batch question generation with structured LLM output
 - Background top-up of the question pool when it runs low
 - Answer checking with per-question explanations
 - Score and counters tracked per session
 - Session summary endpoint
-
-**Planned**
-
+- AI-generated session feedback and timing statistics
 - Curated, nested topic tree with a freeform focus (see [Topic Selection](#topic-selection))
 - Skip option
 - React frontend
@@ -53,6 +49,8 @@ This is an open-source project built with two goals:
 - Async backend
 - AI-generated session feedback and timing statistics
 - Persistent cloud database for history and accounts (after v1)
+
+Note: Some features are planned but not yet implemented. The backend is functional end-to-end, but the frontend has not been started yet.
 
 ## Quiz Rules
 
@@ -118,6 +116,7 @@ Endpoints currently implemented:
 | GET | `/api/get_next_question` | Get the next question (without the answer) |
 | POST | `/api/check_answer` | Submit an answer; returns correctness and explanation |
 | GET | `/api/get_session_summary` | Get final results for the session |
+| GET | `/api/get_session_feedback` | Get AI based session feedback highlighting weak concepts and tips to strengthen them |
 
 Planned: topic list endpoint, skip endpoint. Endpoint names and shapes may change as the API contract is finalized.
 
@@ -135,6 +134,7 @@ Planned: topic list endpoint, skip endpoint. Endpoint names and shapes may chang
 │       ├── schemas.py     # Pydantic schemas
 │       └── utilities.py   # Helpers (e.g. session ID generation)
 ├── frontend/              # planned (React)
+├── tests/
 └── README.md
 ```
 
@@ -173,32 +173,6 @@ uvicorn main:app --reload
 
 A proper dependency file, `.env.example`, and Docker setup are on the roadmap.
 
-## Roadmap
-
-**Phase 1: Make the backend solid**
-- [ ] Fix known inconsistencies so the backend runs end to end
-- [ ] Add the skip flow and per-question status tracking
-- [ ] Curated topic tree and freeform-focus validation
-- [ ] Rate limiting, per-session limits, and session TTL
-- [ ] Reorganize into layers (routes, services, data access)
-- [ ] Move to async
-
-**Phase 2: Frontend**
-- [ ] React app (feed view, topic picker, summary screen)
-- [ ] Typed API client generated from the backend's OpenAPI schema
-
-**Phase 3: Open-source readiness**
-- [ ] Docker and docker-compose (API + Redis)
-- [ ] Automated tests and CI
-- [ ] Linting and formatting, pre-commit hooks
-- [ ] Configuration via environment variables with `.env.example`
-- [ ] Contribution guide and architecture decision records
-
-**After v1**
-- [ ] Cloud database for history and accounts
-- [ ] AI-generated session feedback
-- [ ] Timing statistics
-- [ ] Duplicate-question avoidance strategy
 
 ## Design Decisions
 
