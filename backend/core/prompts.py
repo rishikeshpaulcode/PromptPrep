@@ -32,13 +32,6 @@ QUIZ_REEL_PROMPT_TEMPLATE = """
     Generate the batch strictly according to the specified output schema.
 """
 
-# Instantiate the PromptTemplate
-generate_question_batch_prompt = PromptTemplate(
-    template=QUIZ_REEL_PROMPT_TEMPLATE,
-    input_variables=["topic", "difficulty", "count"]
-)
-
-
 SESSION_FEEDBACK_PROMPT_TEMPLATE = """
 You are an expert educational coach reviewing a student's quiz performance.
 
@@ -50,6 +43,13 @@ Identify every distinct, precise knowledge gap demonstrated by the incorrect
 questions. For each weak concept, provide one or two practical tips that will
 help the student improve that concept.
 """
+
+
+# Instantiate the PromptTemplate
+generate_question_batch_prompt = PromptTemplate(
+    template=QUIZ_REEL_PROMPT_TEMPLATE,
+    input_variables=["topic", "difficulty", "count"]
+)
 
 get_session_feedback_prompt = PromptTemplate(
     template=SESSION_FEEDBACK_PROMPT_TEMPLATE,
