@@ -48,9 +48,7 @@ Incorrect question texts:
 
 Identify every distinct, precise knowledge gap demonstrated by the incorrect
 questions. For each weak concept, provide one or two practical tips that will
-help the student improve that concept. Do not provide an overall score,
-general study advice, or feedback unrelated to the listed questions.
-Return the result strictly according to the requested structured schema.
+help the student improve that concept.
 """
 
 get_session_feedback_prompt = PromptTemplate(
