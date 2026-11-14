@@ -19,6 +19,7 @@
 - Answer checking with per-question explanations
 - Score and counters tracked per session
 - Session summary endpoint
+- AI-generated session feedback
 
 **Planned**
 
@@ -28,7 +29,6 @@
 - Rate limiting and abuse protection
 - Session expiry (TTL)
 - Async backend
-- AI-generated session feedback
 - Persistent cloud database for history and accounts (after v1)
 
 
