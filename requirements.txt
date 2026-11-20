@@ -15,5 +15,4 @@ requests
 # LLM integration
 langchain
 langchain-core
-langchain-google-genai
-google-generativeai
+langchain-nvidia-ai-endpoints
